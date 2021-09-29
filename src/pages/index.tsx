@@ -8,7 +8,34 @@ import { api } from '../services/api';
 import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
+interface ImageData {
+  title: string;
+  description: string;
+  url: string;
+  ts: number;
+  id: string;
+}
+
+interface ImagesApiResponse{
+  data: ImageData[];
+  after: number | null;
+}
+
 export default function Home(): JSX.Element {
+
+  async function listImages({pageParam = null}){
+    const { data } = await api.get<ImagesApiResponse>(`/api/images`, {
+      params: {
+        after: pageParam,
+      },
+    });    
+    
+    console.log('API.GET',data)
+    return data
+  }
+
+  let teste = listImages({pageParam : null})
+  
   const {
     data,
     isLoading,
@@ -18,14 +45,15 @@ export default function Home(): JSX.Element {
     hasNextPage,
   } = useInfiniteQuery(
     'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ,
-    // TODO GET AND RETURN NEXT PAGE PARAM
-  );
+    listImages,{
+      getNextPageParam: lastPage => lastPage?.after || null
+    });
+  
 
   const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
-  }, [data]);
+    return data?.pages.map(obj => obj.data).flat();
+  },[data]);
+
 
   // TODO RENDER LOADING SCREEN
 

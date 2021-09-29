@@ -4,6 +4,8 @@ import fauna from 'faunadb';
 const { query } = fauna;
 const client = new fauna.Client({ secret: process.env.FAUNA_API_KEY });
 
+
+
 interface ImagesQueryResponse {
   after?: {
     id: string;
@@ -78,7 +80,7 @@ export default async function handler(
           after: response.after ? response.after[0].id : null,
         });
       })
-      .catch(err => {
+      .catch(err => {        
         return res.status(400).json(err);
       });
   }
