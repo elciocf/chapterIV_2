@@ -23,18 +23,16 @@ interface ImagesApiResponse{
 
 export default function Home(): JSX.Element {
 
-  async function listImages({pageParam = null}){
+  async function listImages({pageParam = null}){    
     const { data } = await api.get<ImagesApiResponse>(`/api/images`, {
       params: {
         after: pageParam,
       },
     });    
     
-    console.log('API.GET',data)
     return data
   }
 
-  let teste = listImages({pageParam : null})
   
   const {
     data,
@@ -46,7 +44,7 @@ export default function Home(): JSX.Element {
   } = useInfiniteQuery(
     'images',
     listImages,{
-      getNextPageParam: lastPage => lastPage?.after || null
+      getNextPageParam: lastPage => lastPage?.after
     });
   
 
@@ -56,8 +54,17 @@ export default function Home(): JSX.Element {
 
 
   // TODO RENDER LOADING SCREEN
-
+  if (isLoading) {
+    return (
+      <Loading />
+    )
+  }
   // TODO RENDER ERROR SCREEN
+  if (isError) {
+    return (
+      <Error />
+    )
+  }
 
   return (
     <>
@@ -65,7 +72,12 @@ export default function Home(): JSX.Element {
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
-        {/* TODO RENDER LOAD MORE BUTTON IF DATA HAS NEXT PAGE */}
+        { (hasNextPage || isFetchingNextPage) && (
+          <Button mt={5} onClick={() => fetchNextPage()}>
+           {isFetchingNextPage ? 'Carregando...' : 'Carregar mais'}
+          </Button>
+          )
+        } 
       </Box>
     </>
   );
